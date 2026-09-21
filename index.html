@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Event Management System</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container header-container">
+      <h1>Event Planner</h1>
+      <p>Organize, manage, and track your upcoming events seamlessly.</p>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+    
+    <!-- Left Column: Add Event Form -->
+    <section class="form-section">
+      <h2>Create New Event</h2>
+      <form id="event-form">
+        <div class="form-group">
+          <label for="event-title">Event Title *</label>
+          <input type="text" id="event-title" placeholder="e.g., Tech Workshop" required />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="event-date">Date *</label>
+            <input type="date" id="event-date" required />
+          </div>
+          <div class="form-group">
+            <label for="event-time">Time *</label>
+            <input type="time" id="event-time" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="event-category">Category</label>
+          <select id="event-category">
+            <option value="General">General</option>
+            <option value="Tech">Tech</option>
+            <option value="Workshop">Workshop</option>
+            <option value="Social">Social</option>
+            <option value="Meeting">Meeting</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="event-location">Location / Link *</label>
+          <input type="text" id="event-location" placeholder="e.g., Room 101 or Zoom Link" required />
+        </div>
+
+        <div class="form-group">
+          <label for="event-desc">Description</label>
+          <textarea id="event-desc" rows="3" placeholder="Brief event details..."></textarea>
+        </div>
+
+        <button type="submit" class="btn primary-btn">Add Event</button>
+      </form>
+    </section>
+
+    <!-- Right Column: Events List & Filters -->
+    <section class="list-section">
+      <div class="controls">
+        <input type="text" id="search-bar" placeholder="🔍 Search events by title..." />
+        <select id="filter-category">
+          <option value="All">All Categories</option>
+          <option value="General">General</option>
+          <option value="Tech">Tech</option>
+          <option value="Workshop">Workshop</option>
+          <option value="Social">Social</option>
+          <option value="Meeting">Meeting</option>
+        </select>
+      </div>
+
+      <h2>Upcoming Events (<span id="event-count">0</span>)</h2>
+      <div id="events-grid" class="events-grid">
+        <!-- Event Cards will be dynamically inserted here via JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
