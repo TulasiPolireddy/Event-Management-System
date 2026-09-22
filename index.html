@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Eventify - Event Management & Booking System</title>
+  <title>Hyderabad Event Hub - Manage & Book Events</title>
   <link rel="stylesheet" href="style.css" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
@@ -12,7 +12,7 @@
   <!-- Navigation Bar -->
   <nav class="navbar">
     <div class="nav-container">
-      <div class="logo">🎟️ Event<span>ify</span></div>
+      <div class="logo">🎟️ Hyd<span>Events</span></div>
       <ul class="nav-links">
         <li><button class="nav-btn active" data-tab="events-view">Explore Events</button></li>
         <li><button class="nav-btn" data-tab="tickets-view">My Bookings</button></li>
@@ -29,24 +29,24 @@
   <!-- Notification Toast Container -->
   <div id="toast-container" class="toast-container"></div>
 
-  <!-- Main Views Container -->
+  <!-- Main Container -->
   <main class="main-container">
 
     <!-- TAB 1: EXPLORE EVENTS (User View) -->
     <section id="events-view" class="tab-content active">
       <div class="view-header">
         <div>
-          <h2>Discover Upcoming Events</h2>
-          <p>Book tickets and secure your spot in top events.</p>
+          <h2>Discover Events in Hyderabad</h2>
+          <p>Book passes for conferences, cultural fests, workshops, and concerts across the city.</p>
         </div>
         <div class="search-filter-bar">
-          <input type="text" id="user-search" placeholder="🔍 Search event title or venue..." />
+          <input type="text" id="user-search" placeholder="🔍 Search event, area (e.g. Madhapur, Gachibowli)..." />
           <select id="user-filter">
             <option value="All">All Categories</option>
-            <option value="Technology">Technology</option>
-            <option value="Music">Music</option>
-            <option value="Business">Business</option>
-            <option value="Workshop">Workshop</option>
+            <option value="Tech & Startups">Tech & Startups</option>
+            <option value="Music & Food">Music & Food</option>
+            <option value="Arts & Culture">Arts & Culture</option>
+            <option value="Workshops">Workshops</option>
           </select>
         </div>
       </div>
@@ -59,8 +59,8 @@
     <section id="tickets-view" class="tab-content">
       <div class="view-header">
         <div>
-          <h2>My Bookings & Tickets</h2>
-          <p>View your confirmed bookings and download printable tickets.</p>
+          <h2>My Event Passes & Bookings</h2>
+          <p>Access your confirmed registrations and generate printable entry passes.</p>
         </div>
       </div>
       <div id="tickets-grid" class="tickets-grid">
@@ -72,8 +72,8 @@
     <section id="admin-view" class="tab-content">
       <div class="view-header">
         <div>
-          <h2>Admin Management Portal</h2>
-          <p>Monitor analytics, create new events, and manage attendees.</p>
+          <h2>Organizer Admin Portal</h2>
+          <p>Monitor registrations, create events, and manage attendee rosters.</p>
         </div>
         <button class="btn btn-primary" onclick="openEventModal()">+ Create New Event</button>
       </div>
@@ -94,22 +94,22 @@
         </div>
         <div class="stat-card">
           <h4>Total Revenue</h4>
-          <p id="stat-total-revenue">$0</p>
+          <p id="stat-total-revenue">₹0</p>
         </div>
       </div>
 
       <!-- Events Management Table -->
       <div class="table-card">
-        <h3>Manage Events</h3>
+        <h3>Manage City Events</h3>
         <div class="table-responsive">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Event</th>
-                <th>Schedule</th>
-                <th>Venue</th>
+                <th>Event Name</th>
+                <th>Date & Time (IST)</th>
+                <th>Venue (Hyderabad)</th>
                 <th>Seats (Booked/Total)</th>
-                <th>Price</th>
+                <th>Pass Price</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
@@ -126,8 +126,8 @@
     <section id="notifications-view" class="tab-content">
       <div class="view-header">
         <div>
-          <h2>System Notifications</h2>
-          <p>Real-time updates regarding event changes, schedule reminders, and bookings.</p>
+          <h2>City Event Alerts & Updates</h2>
+          <p>Real-time notifications regarding venue updates, reminders, and confirmations.</p>
         </div>
         <button class="btn btn-secondary" onclick="clearNotifications()">Clear All</button>
       </div>
@@ -144,7 +144,7 @@
   <div id="register-modal" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('register-modal')">&times;</span>
-      <h3 id="reg-event-title">Book Event Ticket</h3>
+      <h3 id="reg-event-title">Book Event Pass</h3>
       <p id="reg-event-meta" class="modal-subtitle"></p>
 
       <form id="registration-form">
@@ -152,44 +152,44 @@
         
         <div class="form-group">
           <label>Full Name *</label>
-          <input type="text" id="reg-name" required placeholder="John Doe" />
+          <input type="text" id="reg-name" required placeholder="e.g. Rahul Sharma / Ananya Rao" />
         </div>
         
         <div class="form-group">
           <label>Email Address *</label>
-          <input type="email" id="reg-email" required placeholder="john@example.com" />
+          <input type="email" id="reg-email" required placeholder="rahul@example.com" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Phone Number *</label>
-            <input type="tel" id="reg-phone" required placeholder="+1 234 567 890" />
+            <label>WhatsApp / Mobile Number *</label>
+            <input type="tel" id="reg-phone" required placeholder="+91 98765 43210" />
           </div>
           <div class="form-group">
-            <label>Number of Tickets *</label>
+            <label>Number of Passes *</label>
             <input type="number" id="reg-tickets" min="1" max="5" value="1" required />
           </div>
         </div>
 
         <div class="price-summary">
-          <span>Total Cost:</span>
-          <strong id="reg-total-price">$0</strong>
+          <span>Total Amount:</span>
+          <strong id="reg-total-price">₹0</strong>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Confirm & Generate Ticket</button>
+        <button type="submit" class="btn btn-primary btn-block">Confirm Booking & Get Pass</button>
       </form>
     </div>
   </div>
 
-  <!-- 2. Printable Ticket Modal -->
+  <!-- 2. Printable Entry Pass Modal -->
   <div id="ticket-modal" class="modal">
     <div class="modal-content ticket-modal-wrap">
       <span class="close-modal" onclick="closeModal('ticket-modal')">&times;</span>
       <div id="printable-ticket" class="ticket-pass">
-        <!-- Dynamic Ticket Rendered Here -->
+        <!-- Dynamic Ticket Pass Rendered Here -->
       </div>
       <div class="modal-actions no-print">
-        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Ticket</button>
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print / Save Pass</button>
       </div>
     </div>
   </div>
@@ -198,29 +198,29 @@
   <div id="event-modal" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeModal('event-modal')">&times;</span>
-      <h3 id="event-modal-heading">Create New Event</h3>
+      <h3 id="event-modal-heading">Add New Hyderabad Event</h3>
 
       <form id="event-admin-form">
         <input type="hidden" id="event-edit-id" />
 
         <div class="form-group">
           <label>Event Name *</label>
-          <input type="text" id="evt-title" required placeholder="Global Tech Summit" />
+          <input type="text" id="evt-title" required placeholder="e.g., Hyderabad Tech Summit" />
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Category *</label>
             <select id="evt-category" required>
-              <option value="Technology">Technology</option>
-              <option value="Music">Music</option>
-              <option value="Business">Business</option>
-              <option value="Workshop">Workshop</option>
+              <option value="Tech & Startups">Tech & Startups</option>
+              <option value="Music & Food">Music & Food</option>
+              <option value="Arts & Culture">Arts & Culture</option>
+              <option value="Workshops">Workshops</option>
             </select>
           </div>
           <div class="form-group">
-            <label>Ticket Price ($) *</label>
-            <input type="number" id="evt-price" min="0" value="0" required />
+            <label>Pass Price (₹) *</label>
+            <input type="number" id="evt-price" min="0" value="0" placeholder="0 for Free" required />
           </div>
         </div>
 
@@ -230,28 +230,28 @@
             <input type="date" id="evt-date" required />
           </div>
           <div class="form-group">
-            <label>Time *</label>
+            <label>Time (IST) *</label>
             <input type="time" id="evt-time" required />
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label>Venue / Location *</label>
-            <input type="text" id="evt-venue" required placeholder="Grand Convention Center, Hall 4" />
+            <label>Venue / Location (Hyderabad) *</label>
+            <input type="text" id="evt-venue" required placeholder="e.g., HITEX Madhapur / T-Hub Raidurg" />
           </div>
           <div class="form-group">
-            <label>Total Capacity (Seats) *</label>
-            <input type="number" id="evt-capacity" min="1" required placeholder="100" />
+            <label>Seat Capacity *</label>
+            <input type="number" id="evt-capacity" min="1" required placeholder="e.g. 150" />
           </div>
         </div>
 
         <div class="form-group">
-          <label>Description</label>
-          <textarea id="evt-desc" rows="3" placeholder="Provide a detailed description of this event..."></textarea>
+          <label>Event Description</label>
+          <textarea id="evt-desc" rows="3" placeholder="Details about schedule, speakers, or attractions..."></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Save Event</button>
+        <button type="submit" class="btn btn-primary btn-block">Publish Event</button>
       </form>
     </div>
   </div>
@@ -260,19 +260,19 @@
   <div id="attendees-modal" class="modal">
     <div class="modal-content modal-large">
       <span class="close-modal" onclick="closeModal('attendees-modal')">&times;</span>
-      <h3 id="attendees-modal-title">Event Attendees</h3>
+      <h3 id="attendees-modal-title">Attendee Roster</h3>
       <p id="attendees-modal-meta" class="modal-subtitle"></p>
 
       <div class="table-responsive">
         <table class="data-table">
           <thead>
             <tr>
-              <th>Booking Ref</th>
-              <th>Participant Name</th>
+              <th>Pass ID</th>
+              <th>Attendee Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Seats</th>
-              <th>Paid</th>
+              <th>Passes</th>
+              <th>Paid (INR)</th>
             </tr>
           </thead>
           <tbody id="attendees-tbody">
