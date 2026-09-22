@@ -3,90 +3,285 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Event Management System</title>
+  <title>Eventify - Event Management & Booking System</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="container header-container">
-      <h1>Event Planner</h1>
-      <p>Organize, manage, and track your upcoming events seamlessly.</p>
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="logo">🎟️ Event<span>ify</span></div>
+      <ul class="nav-links">
+        <li><button class="nav-btn active" data-tab="events-view">Explore Events</button></li>
+        <li><button class="nav-btn" data-tab="tickets-view">My Bookings</button></li>
+        <li><button class="nav-btn" data-tab="admin-view">Admin Dashboard</button></li>
+        <li>
+          <button class="nav-btn notif-btn" data-tab="notifications-view">
+            Notifications <span id="notif-badge" class="badge">0</span>
+          </button>
+        </li>
+      </ul>
     </div>
-  </header>
+  </nav>
 
-  <!-- Main Content -->
-  <main class="container">
-    
-    <!-- Left Column: Add Event Form -->
-    <section class="form-section">
-      <h2>Create New Event</h2>
-      <form id="event-form">
-        <div class="form-group">
-          <label for="event-title">Event Title *</label>
-          <input type="text" id="event-title" placeholder="e.g., Tech Workshop" required />
+  <!-- Notification Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main Views Container -->
+  <main class="main-container">
+
+    <!-- TAB 1: EXPLORE EVENTS (User View) -->
+    <section id="events-view" class="tab-content active">
+      <div class="view-header">
+        <div>
+          <h2>Discover Upcoming Events</h2>
+          <p>Book tickets and secure your spot in top events.</p>
         </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="event-date">Date *</label>
-            <input type="date" id="event-date" required />
-          </div>
-          <div class="form-group">
-            <label for="event-time">Time *</label>
-            <input type="time" id="event-time" required />
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="event-category">Category</label>
-          <select id="event-category">
-            <option value="General">General</option>
-            <option value="Tech">Tech</option>
+        <div class="search-filter-bar">
+          <input type="text" id="user-search" placeholder="🔍 Search event title or venue..." />
+          <select id="user-filter">
+            <option value="All">All Categories</option>
+            <option value="Technology">Technology</option>
+            <option value="Music">Music</option>
+            <option value="Business">Business</option>
             <option value="Workshop">Workshop</option>
-            <option value="Social">Social</option>
-            <option value="Meeting">Meeting</option>
           </select>
         </div>
-
-        <div class="form-group">
-          <label for="event-location">Location / Link *</label>
-          <input type="text" id="event-location" placeholder="e.g., Room 101 or Zoom Link" required />
-        </div>
-
-        <div class="form-group">
-          <label for="event-desc">Description</label>
-          <textarea id="event-desc" rows="3" placeholder="Brief event details..."></textarea>
-        </div>
-
-        <button type="submit" class="btn primary-btn">Add Event</button>
-      </form>
+      </div>
+      <div id="events-grid" class="events-grid">
+        <!-- Dynamic Event Cards -->
+      </div>
     </section>
 
-    <!-- Right Column: Events List & Filters -->
-    <section class="list-section">
-      <div class="controls">
-        <input type="text" id="search-bar" placeholder="🔍 Search events by title..." />
-        <select id="filter-category">
-          <option value="All">All Categories</option>
-          <option value="General">General</option>
-          <option value="Tech">Tech</option>
-          <option value="Workshop">Workshop</option>
-          <option value="Social">Social</option>
-          <option value="Meeting">Meeting</option>
-        </select>
+    <!-- TAB 2: MY BOOKINGS & TICKETS -->
+    <section id="tickets-view" class="tab-content">
+      <div class="view-header">
+        <div>
+          <h2>My Bookings & Tickets</h2>
+          <p>View your confirmed bookings and download printable tickets.</p>
+        </div>
+      </div>
+      <div id="tickets-grid" class="tickets-grid">
+        <!-- Dynamic User Tickets -->
+      </div>
+    </section>
+
+    <!-- TAB 3: ADMIN DASHBOARD -->
+    <section id="admin-view" class="tab-content">
+      <div class="view-header">
+        <div>
+          <h2>Admin Management Portal</h2>
+          <p>Monitor analytics, create new events, and manage attendees.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openEventModal()">+ Create New Event</button>
       </div>
 
-      <h2>Upcoming Events (<span id="event-count">0</span>)</h2>
-      <div id="events-grid" class="events-grid">
-        <!-- Event Cards will be dynamically inserted here via JavaScript -->
+      <!-- KPI Metrics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h4>Total Events</h4>
+          <p id="stat-total-events">0</p>
+        </div>
+        <div class="stat-card">
+          <h4>Total Bookings</h4>
+          <p id="stat-total-bookings">0</p>
+        </div>
+        <div class="stat-card">
+          <h4>Total Attendees</h4>
+          <p id="stat-total-attendees">0</p>
+        </div>
+        <div class="stat-card">
+          <h4>Total Revenue</h4>
+          <p id="stat-total-revenue">$0</p>
+        </div>
+      </div>
+
+      <!-- Events Management Table -->
+      <div class="table-card">
+        <h3>Manage Events</h3>
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Schedule</th>
+                <th>Venue</th>
+                <th>Seats (Booked/Total)</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-events-tbody">
+              <!-- Dynamic Admin Table Rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: NOTIFICATIONS -->
+    <section id="notifications-view" class="tab-content">
+      <div class="view-header">
+        <div>
+          <h2>System Notifications</h2>
+          <p>Real-time updates regarding event changes, schedule reminders, and bookings.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="clearNotifications()">Clear All</button>
+      </div>
+      <div id="notifications-list" class="notifications-list">
+        <!-- Dynamic Notifications -->
       </div>
     </section>
 
   </main>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- 1. Event Registration Modal -->
+  <div id="register-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('register-modal')">&times;</span>
+      <h3 id="reg-event-title">Book Event Ticket</h3>
+      <p id="reg-event-meta" class="modal-subtitle"></p>
+
+      <form id="registration-form">
+        <input type="hidden" id="reg-event-id" />
+        
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="reg-name" required placeholder="John Doe" />
+        </div>
+        
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input type="email" id="reg-email" required placeholder="john@example.com" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" id="reg-phone" required placeholder="+1 234 567 890" />
+          </div>
+          <div class="form-group">
+            <label>Number of Tickets *</label>
+            <input type="number" id="reg-tickets" min="1" max="5" value="1" required />
+          </div>
+        </div>
+
+        <div class="price-summary">
+          <span>Total Cost:</span>
+          <strong id="reg-total-price">$0</strong>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Confirm & Generate Ticket</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2. Printable Ticket Modal -->
+  <div id="ticket-modal" class="modal">
+    <div class="modal-content ticket-modal-wrap">
+      <span class="close-modal" onclick="closeModal('ticket-modal')">&times;</span>
+      <div id="printable-ticket" class="ticket-pass">
+        <!-- Dynamic Ticket Rendered Here -->
+      </div>
+      <div class="modal-actions no-print">
+        <button class="btn btn-primary" onclick="window.print()">🖨️ Print Ticket</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Add/Edit Event Modal (Admin) -->
+  <div id="event-modal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" onclick="closeModal('event-modal')">&times;</span>
+      <h3 id="event-modal-heading">Create New Event</h3>
+
+      <form id="event-admin-form">
+        <input type="hidden" id="event-edit-id" />
+
+        <div class="form-group">
+          <label>Event Name *</label>
+          <input type="text" id="evt-title" required placeholder="Global Tech Summit" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="evt-category" required>
+              <option value="Technology">Technology</option>
+              <option value="Music">Music</option>
+              <option value="Business">Business</option>
+              <option value="Workshop">Workshop</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Ticket Price ($) *</label>
+            <input type="number" id="evt-price" min="0" value="0" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date *</label>
+            <input type="date" id="evt-date" required />
+          </div>
+          <div class="form-group">
+            <label>Time *</label>
+            <input type="time" id="evt-time" required />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Venue / Location *</label>
+            <input type="text" id="evt-venue" required placeholder="Grand Convention Center, Hall 4" />
+          </div>
+          <div class="form-group">
+            <label>Total Capacity (Seats) *</label>
+            <input type="number" id="evt-capacity" min="1" required placeholder="100" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="evt-desc" rows="3" placeholder="Provide a detailed description of this event..."></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Save Event</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 4. Manage Attendees Modal -->
+  <div id="attendees-modal" class="modal">
+    <div class="modal-content modal-large">
+      <span class="close-modal" onclick="closeModal('attendees-modal')">&times;</span>
+      <h3 id="attendees-modal-title">Event Attendees</h3>
+      <p id="attendees-modal-meta" class="modal-subtitle"></p>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Booking Ref</th>
+              <th>Participant Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Seats</th>
+              <th>Paid</th>
+            </tr>
+          </thead>
+          <tbody id="attendees-tbody">
+            <!-- Dynamic Attendees Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
