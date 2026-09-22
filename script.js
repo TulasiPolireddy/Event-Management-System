@@ -1,65 +1,77 @@
 /* ==========================================================================
-   EVENT MANAGEMENT SYSTEM - SCRIPT
+   HYDERABAD EVENT MANAGEMENT SYSTEM - JAVASCRIPT
    ========================================================================== */
 
-// --- 1. SEED / INITIAL STATE ---
+// --- 1. DEFAULT SEED DATA (Hyderabad Venues & IST Timings) ---
 const DEFAULT_EVENTS = [
   {
-    id: "EVT-101",
-    title: "Global Tech Innovation Summit 2026",
-    category: "Technology",
-    date: "2026-11-20",
-    time: "10:00",
-    venue: "Convention Hall A, New York & Virtual",
-    capacity: 100,
-    bookedSeats: 45,
-    price: 49,
-    description: "Join international industry leaders exploring Artificial Intelligence, Quantum Computing, and Next-Gen Web."
+    id: "HYD-101",
+    title: "Hyderabad AI & Cloud Tech Summit 2026",
+    category: "Tech & Startups",
+    date: "2026-10-15",
+    time: "10:00", // 10:00 AM
+    venue: "HITEX Exhibition Centre, Hall 2, Madhapur",
+    capacity: 150,
+    bookedSeats: 85,
+    price: 499,
+    description: "Connect with tech leaders, developers, and cloud architects across Telangana & Cyberabad."
   },
   {
-    id: "EVT-102",
-    title: "Summer Acoustic Festival",
-    category: "Music",
-    date: "2026-12-05",
-    time: "17:30",
-    venue: "Sunset Amphitheatre, California",
-    capacity: 50,
-    bookedSeats: 50,
-    price: 25,
-    description: "An evening featuring indie, acoustic, and jazz music by independent artists."
+    id: "HYD-102",
+    title: "Deccan Food & Acoustic Music Fest",
+    category: "Music & Food",
+    date: "2026-10-24",
+    time: "17:30", // 05:30 PM
+    venue: "Shilparamam Amphitheatre, Hitec City",
+    capacity: 200,
+    bookedSeats: 200,
+    price: 250,
+    description: "Enjoy authentic Hyderabadi culinary treats, live Telugu & Hindi acoustic fusion bands."
   },
   {
-    id: "EVT-103",
-    title: "Startup Founders & VC Pitching",
-    category: "Business",
-    date: "2026-11-28",
-    time: "09:00",
-    venue: "Venture Hub, Floor 6",
-    capacity: 40,
-    bookedSeats: 12,
+    id: "HYD-103",
+    title: "T-Hub Founders & Angel Pitch Day",
+    category: "Tech & Startups",
+    date: "2026-11-05",
+    time: "11:00", // 11:00 AM
+    venue: "T-Hub Phase 2, Knowledge City, Raidurg",
+    capacity: 60,
+    bookedSeats: 24,
     price: 0,
-    description: "Connect with early-stage investors, angel networks, and successful tech founders."
+    description: "Exclusive pitching event for early-stage startup founders with Hyderabad Angels & VCs."
+  },
+  {
+    id: "HYD-104",
+    title: "Classical Kuchipudi & Telugu Cultural Night",
+    category: "Arts & Culture",
+    date: "2026-11-12",
+    time: "18:30", // 06:30 PM
+    venue: "Ravindra Bharathi Auditorium, Saifabad",
+    capacity: 120,
+    bookedSeats: 45,
+    price: 150,
+    description: "An auspicious evening celebrating traditional classical dance and folk music of Telugu heritage."
   }
 ];
 
 const DEFAULT_NOTIFICATIONS = [
   {
     id: 1,
-    title: "Welcome to Eventify!",
-    message: "Browse upcoming conferences, workshops, and book instant verified tickets.",
+    title: "Welcome to HydEvents!",
+    message: "Explore top conferences, meetups, and fests across Hyderabad & Cyberabad.",
     type: "info",
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
   },
   {
     id: 2,
-    title: "Seat Alert",
-    message: "Summer Acoustic Festival has reached maximum seat capacity!",
+    title: "Housefull Alert",
+    message: "Deccan Food & Acoustic Music Fest at Shilparamam is now 100% Sold Out!",
     type: "warning",
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
   }
 ];
 
-// --- 2. LOCALSTORAGE HELPERS ---
+// --- 2. STORAGE HELPERS ---
 function getStorage(key, fallback) {
   const data = localStorage.getItem(key);
   return data ? JSON.parse(data) : fallback;
@@ -69,10 +81,21 @@ function setStorage(key, value) {
   localStorage.setItem(key, JSON.stringify(value));
 }
 
-// State variables
-let events = getStorage('eventify_events', DEFAULT_EVENTS);
-let bookings = getStorage('eventify_bookings', []);
-let notifications = getStorage('eventify_notifs', DEFAULT_NOTIFICATIONS);
+// State management
+let events = getStorage('hydevents_list', DEFAULT_EVENTS);
+let bookings = getStorage('hydevents_bookings', []);
+let notifications = getStorage('hydevents_notifs', DEFAULT_NOTIFICATIONS);
+
+// Helper: Convert 24-hr time (e.g. "17:30") to 12-hr IST display ("05:30 PM")
+function formatTimeIST(timeStr) {
+  if (!timeStr) return '';
+  const [hours, minutes] = timeStr.split(':');
+  let h = parseInt(hours, 10);
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  h = h % 12 || 12;
+  const formattedH = h < 10 ? '0' + h : h;
+  return `${formattedH}:${minutes} ${ampm} IST`;
+}
 
 // --- 3. DOM ELEMENTS ---
 const navButtons = document.querySelectorAll('.nav-btn');
@@ -80,8 +103,6 @@ const tabContents = document.querySelectorAll('.tab-content');
 const eventsGrid = document.getElementById('events-grid');
 const userSearch = document.getElementById('user-search');
 const userFilter = document.getElementById('user-filter');
-
-// Form & Modal elements
 const registrationForm = document.getElementById('registration-form');
 const eventAdminForm = document.getElementById('event-admin-form');
 const notifBadge = document.getElementById('notif-badge');
@@ -93,10 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
   renderAdminDashboard();
   renderMyBookings();
   renderNotifications();
-  checkUpcomingEventReminders();
 });
 
-// Navigation / Tabs Switcher
 function setupNavigation() {
   navButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -114,7 +133,7 @@ function setupNavigation() {
   });
 }
 
-// --- 5. RENDER USER EVENTS VIEW ---
+// --- 5. RENDER EVENTS (User View) ---
 function renderEvents() {
   const query = userSearch.value.toLowerCase();
   const category = userFilter.value;
@@ -126,7 +145,7 @@ function renderEvents() {
   });
 
   if (filtered.length === 0) {
-    eventsGrid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color: var(--text-muted);">No events found matching your criteria.</p>`;
+    eventsGrid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color: var(--text-muted); padding: 40px 0;">No events found in Hyderabad matching your search.</p>`;
     return;
   }
 
@@ -139,12 +158,13 @@ function renderEvents() {
         <div>
           <div class="event-card-header">
             <span class="event-cat">${evt.category}</span>
-            <span class="event-price">${evt.price === 0 ? 'FREE' : `$${evt.price}`}</span>
+            <span class="event-price">${evt.price === 0 ? 'FREE ENTRY' : `₹${evt.price}`}</span>
           </div>
           <h3 class="event-title">${escapeHtml(evt.title)}</h3>
           <div class="event-details">
-            📅 ${evt.date} at ${evt.time} <br/>
-            📍 ${escapeHtml(evt.venue)}
+            📅 <strong>Date:</strong> ${evt.date} <br/>
+            ⏰ <strong>Timing:</strong> ${formatTimeIST(evt.time)} <br/>
+            📍 <strong>Venue:</strong> ${escapeHtml(evt.venue)}
           </div>
           <p class="event-desc">${escapeHtml(evt.description)}</p>
         </div>
@@ -152,7 +172,7 @@ function renderEvents() {
         <div>
           <div class="seat-status">
             <div class="seat-info">
-              <span>Available Seats</span>
+              <span>Available Passes</span>
               <span>${evt.capacity - evt.bookedSeats} / ${evt.capacity}</span>
             </div>
             <div class="progress-bar">
@@ -163,7 +183,7 @@ function renderEvents() {
             class="btn btn-primary btn-block" 
             ${isSoldOut ? 'disabled style="background:#94a3b8;cursor:not-allowed;"' : ''}
             onclick="openRegisterModal('${evt.id}')">
-            ${isSoldOut ? 'Sold Out' : 'Register / Book Ticket'}
+            ${isSoldOut ? 'Sold Out' : 'Book Pass'}
           </button>
         </div>
       </div>
@@ -174,7 +194,7 @@ function renderEvents() {
 userSearch.addEventListener('input', renderEvents);
 userFilter.addEventListener('change', renderEvents);
 
-// --- 6. EVENT REGISTRATION & TICKET GENERATION ---
+// --- 6. REGISTRATION & TICKET GENERATION ---
 let currentEventForBooking = null;
 
 function openRegisterModal(eventId) {
@@ -183,7 +203,7 @@ function openRegisterModal(eventId) {
 
   document.getElementById('reg-event-id').value = currentEventForBooking.id;
   document.getElementById('reg-event-title').textContent = currentEventForBooking.title;
-  document.getElementById('reg-event-meta').textContent = `📅 ${currentEventForBooking.date} | 📍 ${currentEventForBooking.venue}`;
+  document.getElementById('reg-event-meta').textContent = `📅 ${currentEventForBooking.date} (${formatTimeIST(currentEventForBooking.time)}) | 📍 ${currentEventForBooking.venue}`;
   
   const ticketInput = document.getElementById('reg-tickets');
   const available = currentEventForBooking.capacity - currentEventForBooking.bookedSeats;
@@ -200,7 +220,7 @@ function updateRegistrationPrice() {
   if (!currentEventForBooking) return;
   const count = parseInt(document.getElementById('reg-tickets').value) || 1;
   const cost = count * currentEventForBooking.price;
-  document.getElementById('reg-total-price').textContent = cost === 0 ? 'FREE' : `$${cost}`;
+  document.getElementById('reg-total-price').textContent = cost === 0 ? 'FREE' : `₹${cost}`;
 }
 
 registrationForm.addEventListener('submit', (e) => {
@@ -210,16 +230,16 @@ registrationForm.addEventListener('submit', (e) => {
   const seatsCount = parseInt(document.getElementById('reg-tickets').value);
 
   if (targetEvent.bookedSeats + seatsCount > targetEvent.capacity) {
-    showToast('Sorry! Not enough seats available.', 'danger');
+    showToast('Seats are no longer available.', 'danger');
     return;
   }
 
   // Update Seats
   targetEvent.bookedSeats += seatsCount;
-  setStorage('eventify_events', events);
+  setStorage('hydevents_list', events);
 
   // Generate Booking
-  const bookingId = 'TKT-' + Math.floor(100000 + Math.random() * 900000);
+  const bookingId = 'HYD-PASS-' + Math.floor(100000 + Math.random() * 900000);
   const newBooking = {
     bookingId,
     eventId: targetEvent.id,
@@ -232,22 +252,21 @@ registrationForm.addEventListener('submit', (e) => {
     phone: document.getElementById('reg-phone').value.trim(),
     ticketsCount: seatsCount,
     totalPaid: seatsCount * targetEvent.price,
-    bookingDate: new Date().toLocaleDateString()
+    bookingDate: new Date().toLocaleDateString('en-IN')
   };
 
   bookings.push(newBooking);
-  setStorage('eventify_bookings', bookings);
+  setStorage('hydevents_bookings', bookings);
 
-  // Trigger Notification
   addNotification(
     "Booking Confirmed!",
-    `You secured ${seatsCount} seat(s) for "${targetEvent.title}". Ref: ${bookingId}`,
+    `Confirmed ${seatsCount} pass(es) for "${targetEvent.title}". Pass Ref: ${bookingId}`,
     "info"
   );
 
   closeModal('register-modal');
   registrationForm.reset();
-  showToast('Booking successful! Your ticket is ready.', 'success');
+  showToast('Booking Confirmed! Entry Pass Generated.', 'success');
 
   renderEvents();
   renderAdminDashboard();
@@ -255,38 +274,39 @@ registrationForm.addEventListener('submit', (e) => {
   showGeneratedTicket(newBooking);
 });
 
-// Show Ticket Modal
+// Show Printable Pass
 function showGeneratedTicket(booking) {
   const container = document.getElementById('printable-ticket');
   container.innerHTML = `
     <div class="ticket-header">
       <div>
-        <h2 style="font-size:1.3rem;">${escapeHtml(booking.eventTitle)}</h2>
-        <span style="font-size:0.85rem; opacity:0.9;">PASS ID: ${booking.bookingId}</span>
+        <h2 style="font-size:1.25rem;">${escapeHtml(booking.eventTitle)}</h2>
+        <span style="font-size:0.85rem; opacity:0.9;">PASS REF: ${booking.bookingId}</span>
       </div>
       <div style="text-align:right;">
-        <span style="font-size:0.8rem;">Seats</span>
+        <span style="font-size:0.75rem;">Total Passes</span>
         <h3 style="font-size:1.4rem;">${booking.ticketsCount}</h3>
       </div>
     </div>
-    <div style="font-size:0.9rem; line-height: 1.6;">
-      <p>👤 <strong>Attendee:</strong> ${escapeHtml(booking.name)} (${escapeHtml(booking.email)})</p>
-      <p>📅 <strong>Date & Time:</strong> ${booking.eventDate} at ${booking.eventTime}</p>
-      <p>📍 <strong>Location:</strong> ${escapeHtml(booking.eventVenue)}</p>
-      <p>💵 <strong>Amount Paid:</strong> ${booking.totalPaid === 0 ? 'FREE' : '$' + booking.totalPaid}</p>
+    <div style="font-size:0.9rem; line-height: 1.7;">
+      <p>👤 <strong>Attendee:</strong> ${escapeHtml(booking.name)} (${escapeHtml(booking.phone)})</p>
+      <p>📅 <strong>Date:</strong> ${booking.eventDate}</p>
+      <p>⏰ <strong>Time:</strong> ${formatTimeIST(booking.eventTime)}</p>
+      <p>📍 <strong>Hyderabad Venue:</strong> ${escapeHtml(booking.eventVenue)}</p>
+      <p>💵 <strong>Amount:</strong> ${booking.totalPaid === 0 ? 'FREE ENTRY' : '₹' + booking.totalPaid}</p>
     </div>
     <div class="ticket-barcode">
-      ||||||||||||||||||| ${booking.bookingId} |||||||||||||||||||
+      |||||||| ${booking.bookingId} ||||||||
     </div>
   `;
   openModal('ticket-modal');
 }
 
-// Render "My Bookings" Tab
+// Render "My Bookings"
 function renderMyBookings() {
   const container = document.getElementById('tickets-grid');
   if (bookings.length === 0) {
-    container.innerHTML = `<p style="color:var(--text-muted);">You have not registered for any events yet.</p>`;
+    container.innerHTML = `<p style="color:var(--text-muted);">You have no event passes booked yet.</p>`;
     return;
   }
 
@@ -298,21 +318,21 @@ function renderMyBookings() {
           <span style="font-size:0.8rem; opacity:0.9;">Ref: ${b.bookingId}</span>
         </div>
         <div style="text-align:right;">
-          <span style="font-size:0.75rem;">Seats</span>
+          <span style="font-size:0.75rem;">Passes</span>
           <h4>${b.ticketsCount}</h4>
         </div>
       </div>
-      <div style="font-size:0.85rem; margin-bottom:10px;">
-        📅 ${b.eventDate} | 📍 ${escapeHtml(b.eventVenue)}
+      <div style="font-size:0.85rem; margin-bottom:12px; line-height:1.5;">
+        📅 ${b.eventDate} (${formatTimeIST(b.eventTime)}) <br/>
+        📍 ${escapeHtml(b.eventVenue)}
       </div>
-      <button class="btn btn-secondary btn-sm" onclick='showGeneratedTicket(${JSON.stringify(b)})'>View Full Ticket Pass</button>
+      <button class="btn btn-secondary btn-sm" onclick='showGeneratedTicket(${JSON.stringify(b)})'>View / Print Pass</button>
     </div>
   `).join('');
 }
 
-// --- 7. ADMIN DASHBOARD OPERATIONS ---
+// --- 7. ADMIN DASHBOARD ---
 function renderAdminDashboard() {
-  // Update Metrics
   const totalEvents = events.length;
   const totalBookings = bookings.length;
   const totalAttendees = bookings.reduce((sum, b) => sum + b.ticketsCount, 0);
@@ -321,9 +341,8 @@ function renderAdminDashboard() {
   document.getElementById('stat-total-events').textContent = totalEvents;
   document.getElementById('stat-total-bookings').textContent = totalBookings;
   document.getElementById('stat-total-attendees').textContent = totalAttendees;
-  document.getElementById('stat-total-revenue').textContent = `$${totalRevenue}`;
+  document.getElementById('stat-total-revenue').textContent = `₹${totalRevenue}`;
 
-  // Update Admin Table
   const tbody = document.getElementById('admin-events-tbody');
   if (events.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;">No events created yet.</td></tr>`;
@@ -335,10 +354,10 @@ function renderAdminDashboard() {
     return `
       <tr>
         <td><strong>${escapeHtml(evt.title)}</strong><br/><small style="color:var(--text-muted);">${evt.category}</small></td>
-        <td>${evt.date}<br/><small>${evt.time}</small></td>
+        <td>${evt.date}<br/><small>${formatTimeIST(evt.time)}</small></td>
         <td>${escapeHtml(evt.venue)}</td>
         <td>${evt.bookedSeats} / ${evt.capacity}</td>
-        <td>${evt.price === 0 ? 'FREE' : '$' + evt.price}</td>
+        <td>${evt.price === 0 ? 'FREE' : '₹' + evt.price}</td>
         <td>
           <span class="status-badge ${isSoldOut ? 'status-soldout' : 'status-available'}">
             ${isSoldOut ? 'Sold Out' : 'Active'}
@@ -356,7 +375,7 @@ function renderAdminDashboard() {
   }).join('');
 }
 
-// Create or Edit Event Submit
+// Create/Edit Event Form
 eventAdminForm.addEventListener('submit', (e) => {
   e.preventDefault();
   const editId = document.getElementById('event-edit-id').value;
@@ -373,26 +392,24 @@ eventAdminForm.addEventListener('submit', (e) => {
   };
 
   if (editId) {
-    // Edit existing event
     const index = events.findIndex(e => e.id === editId);
     if (index !== -1) {
       events[index] = { ...events[index], ...eventPayload };
-      addNotification("Event Updated", `Details updated for event: "${eventPayload.title}"`, "warning");
+      addNotification("Schedule Update", `Details updated for Hyderabad event: "${eventPayload.title}"`, "warning");
       showToast('Event updated successfully!', 'success');
     }
   } else {
-    // Add new event
     const newEvent = {
-      id: 'EVT-' + Date.now().toString().slice(-4),
+      id: 'HYD-' + Date.now().toString().slice(-4),
       bookedSeats: 0,
       ...eventPayload
     };
     events.push(newEvent);
-    addNotification("New Event Published", `"${newEvent.title}" is now open for registration!`, "info");
-    showToast('New event created successfully!', 'success');
+    addNotification("New Event in Hyderabad", `"${newEvent.title}" at ${newEvent.venue} is now open!`, "info");
+    showToast('New event created!', 'success');
   }
 
-  setStorage('eventify_events', events);
+  setStorage('hydevents_list', events);
   closeModal('event-modal');
   eventAdminForm.reset();
 
@@ -402,7 +419,7 @@ eventAdminForm.addEventListener('submit', (e) => {
 
 function openEventModal() {
   document.getElementById('event-edit-id').value = '';
-  document.getElementById('event-modal-heading').textContent = 'Create New Event';
+  document.getElementById('event-modal-heading').textContent = 'Add New Hyderabad Event';
   eventAdminForm.reset();
   openModal('event-modal');
 }
@@ -426,38 +443,36 @@ function openEditEventModal(eventId) {
   openModal('event-modal');
 }
 
-// Delete Event
 function deleteEvent(eventId) {
   const target = events.find(e => e.id === eventId);
   if (!target) return;
 
-  if (confirm(`Are you sure you want to delete "${target.title}"? This will notify all registered users.`)) {
+  if (confirm(`Cancel and delete "${target.title}"? This will alert all registered attendees.`)) {
     events = events.filter(e => e.id !== eventId);
-    setStorage('eventify_events', events);
+    setStorage('hydevents_list', events);
 
     addNotification(
       "Event Cancelled",
-      `The event "${target.title}" has been cancelled by the organizer.`,
+      `The event "${target.title}" at ${target.venue} has been cancelled.`,
       "danger"
     );
 
-    showToast('Event removed.', 'danger');
+    showToast('Event deleted.', 'danger');
     renderEvents();
     renderAdminDashboard();
   }
 }
 
-// View Attendees List Modal
 function viewAttendees(eventId) {
   const evt = events.find(e => e.id === eventId);
   const eventAttendees = bookings.filter(b => b.eventId === eventId);
 
   document.getElementById('attendees-modal-title').textContent = `${evt.title} - Attendees`;
-  document.getElementById('attendees-modal-meta').textContent = `Total registered participants: ${eventAttendees.length}`;
+  document.getElementById('attendees-modal-meta').textContent = `Total attendees registered: ${eventAttendees.length}`;
 
   const tbody = document.getElementById('attendees-tbody');
   if (eventAttendees.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No participants have registered yet.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No participants have registered for this event yet.</td></tr>`;
   } else {
     tbody.innerHTML = eventAttendees.map(a => `
       <tr>
@@ -466,7 +481,7 @@ function viewAttendees(eventId) {
         <td>${escapeHtml(a.email)}</td>
         <td>${escapeHtml(a.phone)}</td>
         <td>${a.ticketsCount}</td>
-        <td>${a.totalPaid === 0 ? 'FREE' : '$' + a.totalPaid}</td>
+        <td>${a.totalPaid === 0 ? 'FREE' : '₹' + a.totalPaid}</td>
       </tr>
     `).join('');
   }
@@ -474,20 +489,19 @@ function viewAttendees(eventId) {
   openModal('attendees-modal');
 }
 
-// --- 8. NOTIFICATION ENGINE ---
+// --- 8. NOTIFICATIONS ---
 function addNotification(title, message, type = 'info') {
   const newNotif = {
     id: Date.now(),
     title,
     message,
     type,
-    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    time: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
   };
 
   notifications.unshift(newNotif);
-  setStorage('eventify_notifs', notifications);
+  setStorage('hydevents_notifs', notifications);
   
-  // Increment badge
   notifBadge.textContent = parseInt(notifBadge.textContent || 0) + 1;
   renderNotifications();
 }
@@ -495,7 +509,7 @@ function addNotification(title, message, type = 'info') {
 function renderNotifications() {
   const container = document.getElementById('notifications-list');
   if (notifications.length === 0) {
-    container.innerHTML = `<p style="color:var(--text-muted);">No notifications right now.</p>`;
+    container.innerHTML = `<p style="color:var(--text-muted);">No active notifications.</p>`;
     return;
   }
 
@@ -512,22 +526,12 @@ function renderNotifications() {
 
 function clearNotifications() {
   notifications = [];
-  setStorage('eventify_notifs', notifications);
+  setStorage('hydevents_notifs', notifications);
   notifBadge.textContent = '0';
   renderNotifications();
 }
 
-// Scheduled check for upcoming events
-function checkUpcomingEventReminders() {
-  const today = new Date().toISOString().split('T')[0];
-  events.forEach(evt => {
-    if (evt.date === today) {
-      addNotification("Event Reminder Today!", `"${evt.title}" is happening today at ${evt.time} in ${evt.venue}.`, "warning");
-    }
-  });
-}
-
-// --- 9. UTILITY / MODAL HELPERS ---
+// --- 9. UTILITY HELPERS ---
 function openModal(modalId) {
   document.getElementById(modalId).classList.add('open');
 }
@@ -536,7 +540,6 @@ function closeModal(modalId) {
   document.getElementById(modalId).classList.remove('open');
 }
 
-// Close modal when clicking outside content
 window.addEventListener('click', (e) => {
   if (e.target.classList.contains('modal')) {
     e.target.classList.remove('open');
@@ -548,7 +551,7 @@ function showToast(message, type = 'info') {
   const toast = document.createElement('div');
   toast.className = 'toast';
   if (type === 'danger') toast.style.borderLeft = '4px solid #ef4444';
-  if (type === 'success') toast.style.borderLeft = '4px solid #10b981';
+  if (type === 'success') toast.style.borderLeft = '4px solid #16a34a';
   toast.textContent = message;
 
   container.appendChild(toast);
